@@ -57,59 +57,81 @@ telegram-mail-bot/
 
 ## Setup
 
-### 1. Gmail OAuth (run once, locally)
-
-1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Create a project → enable **Gmail API**
-3. **Credentials** → OAuth 2.0 Client ID → Desktop app → download JSON → save as `credentials.json`
-4. **OAuth consent screen** → Test users → add your Gmail address
-5. Run `auth.py` on your **local machine** (requires a browser):
+### 1. Clone & install (local machine)
 
 ```bash
-pip install google-auth-oauthlib python-dotenv
-python auth.py
-```
-
-This opens a browser → sign in → generates `gmail_token.json`.
-
-6. Copy both files to your server's data directory:
-
-```bash
-scp credentials.json gmail_token.json user@server:/path/to/data/
+git clone https://github.com/youruser/telegram-mail-bot.git
+cd telegram-mail-bot
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ---
 
-### 2. Configure
+### 2. Gmail OAuth (run once, locally — requires a browser)
+
+**Step 1 — Get credentials.json from Google Cloud Console**
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Create a new project → **APIs & Services** → **Enable APIs** → search **Gmail API** → Enable
+3. **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID** → Application type: **Desktop app** → Create
+4. Download the JSON file → rename it to `credentials.json` → place it in the project folder
+5. **OAuth consent screen** → **Test users** → **+ Add Users** → add your Gmail address → Save
+
+**Step 2 — Generate the token**
+
+```bash
+python auth.py
+```
+
+A browser window opens → sign in with your Gmail → allow access → `gmail_token.json` is created.
+
+**Step 3 — Copy both files to your server**
+
+```bash
+# Create the data directory on the server first
+ssh user@server "mkdir -p /path/to/data"
+
+# Copy the files
+scp credentials.json gmail_token.json user@server:/path/to/data/
+```
+
+> These two files are gitignored — never commit them.
+
+---
+
+### 3. Configure (on the server)
 
 ```bash
 cp .env.example .env
+nano .env
 ```
 
 | Variable | Description |
 |---|---|
 | `TELEGRAM_BOT_TOKEN` | From [@BotFather](https://t.me/BotFather) |
 | `TELEGRAM_USER_ID` | Your Telegram ID — from [@userinfobot](https://t.me/userinfobot) |
-| `HOST_DATA_DIR` | Absolute path to your data directory on the host |
+| `HOST_DATA_DIR` | Absolute path to the data directory on the host (where credentials/token are stored) |
 | `OLLAMA_HOST` | Ollama server URL (default: `http://localhost:11434`) |
 | `OLLAMA_MODEL` | Model name (default: `llama3.2:3b`) |
 | `POLLING_INTERVAL_SECONDS` | How often to check Gmail (default: `120`) |
 
 ---
 
-### 3. Ollama
+### 4. Ollama (on the server)
 
 ```bash
-ollama pull llama3.2:3b   # fast, ~2GB RAM
+ollama pull llama3.2:3b   # ~2GB RAM, fast
 # or
-ollama pull llama3.1:8b   # better quality, ~5GB RAM
+ollama pull llama3.1:8b   # ~5GB RAM, better quality
 ```
 
-If Ollama runs on a different server, set `OLLAMA_HOST=http://<server_ip>:11434`.
+If Ollama runs on a separate server, set `OLLAMA_HOST=http://<server_ip>:11434`.
 
 ---
 
-### 4. Run
+### 5. Run
 
 ```bash
 bash setup.sh
