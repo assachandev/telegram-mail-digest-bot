@@ -24,7 +24,7 @@ class OllamaService:
                         {"role": "user", "content": build_user_prompt(emails)},
                     ],
                 },
-                timeout=300,
+                timeout=600,
             )
             response.raise_for_status()
             return response.json()["message"]["content"].strip()
