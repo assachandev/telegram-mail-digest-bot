@@ -1,0 +1,10 @@
+.git
+.env
+__pycache__
+*.pyc
+*.pyo
+data/
+state.json
+gmail_token.json
+credentials.json
+.DS_Store
