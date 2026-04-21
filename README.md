@@ -121,11 +121,15 @@ nano .env
 
 ### 4. Ollama (on the server)
 
+Pull any model you want — set `OLLAMA_MODEL` in `.env` to match:
+
 ```bash
-ollama pull llama3.2:3b   # ~2GB RAM, fast
-# or
-ollama pull llama3.1:8b   # ~5GB RAM, better quality
+ollama pull llama3.2:3b    # ~2GB RAM — fast, CPU-friendly
+ollama pull qwen2.5:7b     # ~5GB RAM — better instruction following
+ollama pull qwen2.5:14b    # ~9GB RAM — best quality, needs more RAM
 ```
+
+> Any model that supports chat (`/api/chat`) works. Pick based on your hardware.
 
 If Ollama runs on a separate server, set `OLLAMA_HOST=http://<server_ip>:11434`.
 

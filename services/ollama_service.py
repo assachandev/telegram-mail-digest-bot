@@ -18,7 +18,7 @@ class OllamaService:
                 json={
                     "model": self.model,
                     "stream": False,
-                    "options": {"num_predict": 500},
+                    "options": {"num_predict": 800},
                     "messages": [
                         {"role": "system", "content": build_system_prompt()},
                         {"role": "user", "content": build_user_prompt(emails)},
