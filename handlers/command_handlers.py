@@ -45,8 +45,15 @@ class CommandHandlers:
         if not self._is_authorized(update):
             return
         active = self.state.is_polling_active()
+        status = "▶️ Active" if active else "⏸ Paused"
         await update.message.reply_text(
-            "Mail Digest Bot is ready ✓",
+            f"📬 Mail Digest Bot is ready\n\n"
+            f"Status: {status}\n"
+            f"Checking inbox every 2 minutes and summarizing new emails automatically.\n\n"
+            f"📋 History — view past summaries\n"
+            f"⏸ Pause / ▶️ Resume — stop or restart notifications\n"
+            f"💤 Snooze 4h — mute for 4 hours\n"
+            f"ℹ️ Status — check current state",
             reply_markup=get_main_keyboard(active),
         )
 
@@ -73,7 +80,7 @@ class CommandHandlers:
         active = self.state.is_polling_active()
         if not history:
             await update.message.reply_text(
-                "No summary history yet.",
+                "📭 No summary history yet.\nNew email digests will appear here once received.",
                 reply_markup=get_main_keyboard(active),
             )
             return
@@ -100,21 +107,21 @@ class CommandHandlers:
     async def _clear_history(self, update: Update):
         self.state.clear_history()
         await update.message.reply_text(
-            "🗑 History cleared.",
+            "🗑 History cleared.\nAll past summaries have been removed.",
             reply_markup=get_main_keyboard(self.state.is_polling_active()),
         )
 
     async def _pause(self, update: Update):
         self.state.set_polling_active(False)
         await update.message.reply_text(
-            "⏸ Polling paused.",
+            "⏸ Polling paused.\nYou won't receive new email digests until resumed.",
             reply_markup=get_main_keyboard(False),
         )
 
     async def _resume(self, update: Update):
         self.state.set_polling_active(True)
         await update.message.reply_text(
-            "▶️ Polling resumed.",
+            "▶️ Polling resumed.\nNew email digests will be delivered as usual.",
             reply_markup=get_main_keyboard(True),
         )
 
@@ -122,7 +129,7 @@ class CommandHandlers:
         self.state.snooze(hours=4)
         snoozed_until = self.state.get_snoozed_until()
         await update.message.reply_text(
-            f"💤 Snoozed until {snoozed_until}.",
+            f"💤 Snoozed until {snoozed_until}.\nNotifications will resume automatically after that.",
             reply_markup=get_main_keyboard(False),
         )
 
@@ -140,7 +147,8 @@ class CommandHandlers:
 
         await update.message.reply_text(
             f"ℹ️ Status\n\n"
-            f"Polling  {state_str}\n"
-            f"Last poll  {last_poll or 'never'}",
+            f"Polling:    {state_str}\n"
+            f"Last poll:  {last_poll or 'never'}\n"
+            f"Interval:   every 2 minutes",
             reply_markup=get_main_keyboard(active),
         )
