@@ -1,6 +1,8 @@
 import os
+import re
 import base64
 import logging
+from email.utils import parsedate_to_datetime
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -10,7 +12,9 @@ from .base_mail_service import BaseMailService
 
 logger = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
-BODY_LIMIT = 1500  # chars sent to Ollama per email
+BODY_LIMIT = 3000  # chars sent to Ollama per email
+URL_PATTERN = re.compile(r'https?://[^\s<>"\']+')
+MAX_LINKS = 3
 
 
 class GmailService(BaseMailService):
@@ -66,12 +70,21 @@ class GmailService(BaseMailService):
 
             headers = {h["name"]: h["value"] for h in msg["payload"]["headers"]}
             body = self._extract_body(msg["payload"])
+            links = list(dict.fromkeys(URL_PATTERN.findall(body)))[:MAX_LINKS]
+
+            date_str = headers.get("Date", "")
+            try:
+                date = parsedate_to_datetime(date_str).strftime("%d/%m/%Y %H:%M") if date_str else ""
+            except Exception:
+                date = date_str
 
             return {
                 "id": message_id,
                 "subject": headers.get("Subject", "(no subject)"),
                 "from": headers.get("From", "Unknown"),
+                "date": date,
                 "snippet": body[:BODY_LIMIT] if body else msg.get("snippet", ""),
+                "links": links,
                 "labels": msg.get("labelIds", []),
             }
         except Exception as e:
