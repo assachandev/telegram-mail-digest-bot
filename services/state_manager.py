@@ -24,6 +24,7 @@ class StateManager:
             "snoozed_until": None,
             "last_poll_time": None,
             "history": [],
+            "ollama_available": True,
         }
 
     def _save(self):
@@ -101,4 +102,13 @@ class StateManager:
 
     def clear_history(self):
         self.state["history"] = []
+        self._save()
+
+    # ── Ollama availability ───────────────────────────────────────────────────
+
+    def is_ollama_available(self) -> bool:
+        return self.state.get("ollama_available", True)
+
+    def set_ollama_available(self, available: bool):
+        self.state["ollama_available"] = available
         self._save()

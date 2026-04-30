@@ -137,6 +137,7 @@ class CommandHandlers:
         active = self.state.is_polling_active()
         snoozed_until = self.state.get_snoozed_until()
         last_poll = self.state.get_last_poll_time()
+        ollama_available = self.state.is_ollama_available()
 
         if snoozed_until:
             state_str = f"💤 Snoozed until {snoozed_until}"
@@ -145,10 +146,13 @@ class CommandHandlers:
         else:
             state_str = "⏸ Paused"
 
+        ollama_str = "✅ Connected" if ollama_available else "❌ Disconnected (retrying)"
+
         await update.message.reply_text(
             f"ℹ️ Status\n\n"
             f"Polling:    {state_str}\n"
             f"Last poll:  {last_poll or 'never'}\n"
-            f"Interval:   every 2 minutes",
+            f"Interval:   every 2 minutes\n"
+            f"Ollama:     {ollama_str}",
             reply_markup=get_main_keyboard(active),
         )
